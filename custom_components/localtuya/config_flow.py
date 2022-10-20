@@ -242,12 +242,23 @@ async def validate_input(hass: core.HomeAssistant, data):
 
     reset_ids = None
     try:
-        interface = await pytuya.connect(
-            data[CONF_HOST],
-            data[CONF_DEVICE_ID],
-            data[CONF_LOCAL_KEY],
-            float(data[CONF_PROTOCOL_VERSION]),
-        )
+        if(float(data[CONF_PROTOCOL_VERSION]) == 3.4):
+            module = import_module('custom_components.localtuya.tinytuya.tinytuya')
+            interface = await module.connect(
+                data[CONF_HOST],
+                data[CONF_DEVICE_ID],
+                data[CONF_LOCAL_KEY],
+                float(data[CONF_PROTOCOL_VERSION]),
+                None,
+            )
+        else:
+            interface = await pytuya.connect(
+                data[CONF_HOST],
+                data[CONF_DEVICE_ID],
+                data[CONF_LOCAL_KEY],
+                float(data[CONF_PROTOCOL_VERSION]),
+            )
+
         if CONF_RESET_DPIDS in data:
             reset_ids_str = data[CONF_RESET_DPIDS].split(",")
             reset_ids = []
