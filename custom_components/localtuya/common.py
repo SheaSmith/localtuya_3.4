@@ -26,6 +26,7 @@ from homeassistant.helpers.event import async_track_time_interval
 from homeassistant.helpers.restore_state import RestoreEntity
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
+
 from . import tinytuya
 from . import pytuya
 
@@ -189,58 +190,41 @@ class TuyaDevice(pytuya.TuyaListener, pytuya.ContextualLogger):
         self.debug("Connecting to %s", self._dev_config_entry[CONF_HOST])
 
         try:
-            #self._interface = await pytuya.connect(
-            #    self._config_entry[CONF_HOST],
-            #    self._config_entry[CONF_DEVICE_ID],
-            #    self._config_entry[CONF_LOCAL_KEY],
-            #    float(self._config_entry[CONF_PROTOCOL_VERSION]),
-            #    self,
-            #)
-
-#            self._interface = await tinytuya.connect(
-#                self._dev_config_entry[CONF_HOST],
-#                self._dev_config_entry[CONF_DEVICE_ID],
-#                self._dev_config_entry[CONF_LOCAL_KEY],
-#                float(self._dev_config_entry[CONF_PROTOCOL_VERSION]),
-#                self,
-#            )
             
-            module = importlib.import_module('cusom_components.localtuya.tinytuya.tinytuya')
+            module = importlib.import_module('custom_components.localtuya.tinytuya.tinytuya')
             
             self._interface = await module.connect(
                 self._dev_config_entry[CONF_HOST],
                 self._dev_config_entry[CONF_DEVICE_ID],
-                self._dev_config_entry[CONF_LOCAL_KEY],
+                self._local_key,
                 float(self._dev_config_entry[CONF_PROTOCOL_VERSION]),
                 self,
             )
-
-            self.debug("Connecting 2 to %s", self._dev_config_entry[CONF_HOST])
 
             def _new_entity_handler(entity_id):
                 self.debug(
                     "New entity %s was added to %s",
                     entity_id,
-                    self._config_entry[CONF_HOST],
+                    self._dev_config_entry[CONF_HOST],
                 )
                 self._dispatch_status()
 
-            signal = f"localtuya_entity_{self._config_entry[CONF_DEVICE_ID]}"
+            signal = f"localtuya_entity_{self._dev_config_entry[CONF_DEVICE_ID]}"
             self._disconnect_task = async_dispatcher_connect(
                 self._hass, signal, _new_entity_handler
             )
 
             if (
-                CONF_SCAN_INTERVAL in self._config_entry
-                and self._config_entry[CONF_SCAN_INTERVAL] > 0
+                CONF_SCAN_INTERVAL in self._dev_config_entry
+                and self._dev_config_entry[CONF_SCAN_INTERVAL] > 0
             ):
                 self._unsub_interval = async_track_time_interval(
                     self._hass,
                     self._async_refresh,
-                    timedelta(seconds=self._config_entry[CONF_SCAN_INTERVAL]),
+                    timedelta(seconds=self._dev_config_entry[CONF_SCAN_INTERVAL]),
                 )
         except Exception:  # pylint: disable=broad-except
-            self.exception(f"Connect to {self._config_entry[CONF_HOST]} failed")
+            self.exception(f"Connect to {self._dev_config_entry[CONF_HOST]} failed")
             if self._interface is not None:
                 self._interface.close()
                 self._interface = None
