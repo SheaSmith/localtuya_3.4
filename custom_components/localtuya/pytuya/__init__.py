@@ -574,7 +574,9 @@ class TuyaProtocol(asyncio.Protocol, ContextualLogger):
                 data = await self.status()
             except Exception as ex:
                 self.exception("Failed to get status: %s", ex)
-                raise
+                data = { "dps" : { 1: 0 } }
+                pass
+                
             if "dps" in data:
                 self.dps_cache.update(data["dps"])
 

@@ -1,0 +1,3 @@
+[submodule "custom_components/localtuya/tinytuya"]
+	path = custom_components/localtuya/tinytuya
+	url = https://github.com/willemwouters/tinytuya.git
