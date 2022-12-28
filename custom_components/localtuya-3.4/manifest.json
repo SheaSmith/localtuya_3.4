@@ -1,5 +1,5 @@
 {
-  "domain": "localtuya-3.4",
+  "domain": "localtuya_3.4",
   "name": "LocalTuya 3.4 integration",
   "version": "4.1.1",
   "documentation": "https://github.com/rospogrigio/localtuya/",
